@@ -4,8 +4,7 @@
 Command line tools for tasks at Limesoft
 
 Based on following repo
-Credits: [https://github.com/makandra/geordi][1]
-  [1]: https://github.com/makandra/geordi [makandra/geordi]
+Credits: [https://github.com/makandra/geordi]
 
 ## Installation
 
