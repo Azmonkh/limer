@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "limer"
 
-  s.add_dependency("highline")
-  s.add_dependency("pivotal-tracker")
+  s.add_dependency("highline", "~> 1.6.17")
+  s.add_dependency("pivotal-tracker","~> 0.5.10")
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
