@@ -43,7 +43,6 @@ module Limer
         You may remove that file for the wizard to reappear.
 
         ----------------------------------------------------"
-
     end
 
     def load_setting
@@ -139,8 +138,7 @@ module Limer
           commit_message << ' - '<< message.strip
         end
 
-        puts commit_message
-        # exec('git', 'commit', '-m', commit_message)
+        exec('git', 'commit', '-m', commit_message)
       end
     end
     def run

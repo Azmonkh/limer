@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Orgil Urtnasan"]
   s.email       = ["orgil@limesoft.mn"]
-  s.homepage    = "http://limesoft.com"
+  s.homepage    = "http://limesoft.mn"
   s.summary     = 'Command line tools for tasks at Limesoft.'
   s.description = 'COmmand line tools for tasks at Limesoft.'
 
