@@ -24,13 +24,17 @@ module Limer
       bold HighLine::BLUE + string
     end
 
+    def missing string
+      bold HighLine::RED + string
+    end
+
     def bold string
       HighLine::BOLD + string + HighLine::RESET
     end
 
     def hello
-      highline.say HighLine::RESET
-      highline.say "Welcome to #{bold 'gitpt'}.\n\n"
+      @highline.say HighLine::RESET
+      @highline.say "Welcome to #{bold 'Limer'}.\n\n"
     end
 
     def settings_valid?
@@ -38,7 +42,7 @@ module Limer
     end
 
     def stored
-      highline.say "
+      @highline.say "
         Thank you. Your settings have been stored at #{highlight @settings_file}
         You may remove that file for the wizard to reappear.
 
@@ -60,7 +64,7 @@ module Limer
         project_ids = File.read(project_id_file).split(/[\s]+/).map(&:to_i)
       end
       unless project_ids and project_ids.size > 0
-        highline.say "No project config provided. Add project id(s) to .pt_project_id file"
+        @highline.say "No project config provided. Add project id(s) to .pt_project_id file"
         exit 1
       end
       loading 'Connecting to Pivotal Tracker: ... ' do
@@ -85,11 +89,11 @@ module Limer
     end
 
     def request_settings
-      highline.say highlight('Your settings are missing or invalid.')
-      highline.say "Please configure your Pivotal Tracker access.\n\n"
-      token = highline.ask bold("Your API key:") + " "
-      initials = highline.ask bold("Your PT initials") + " (optional, used for highlighting your stories): "
-      highline.say "\n"
+      @highline.say highlight('Your settings are missing or invalid.')
+      @highline.say "Please configure your Pivotal Tracker access.\n\n"
+      token = @highline.ask bold("Your API key:") + " "
+      initials = @highline.ask bold("Your PT initials") + " (optional, used for highlighting your stories): "
+      @highline.say "\n"
 
       settings = { :token => token, :initials => initials }
 
@@ -103,7 +107,7 @@ module Limer
     def choose_story
       selected_story = nil
 
-      highline.choose do |menu|
+      @highline.choose do |menu|
         menu.header = "Choose a story"
         applicable_stories.each do |story|
           owner_name = story.owned_by
@@ -130,8 +134,8 @@ module Limer
       end
 
       if selected_story
-        message = highline.ask("\nAdd an optional message")
-        highline.say message
+        message = @highline.ask("\nAdd an optional message")
+        @highline.say message
 
         commit_message = "[##{selected_story.id}] #{selected_story.name}"
         if message.strip != ''
