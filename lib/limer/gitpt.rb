@@ -6,7 +6,7 @@ require 'yaml'
 
 module Limer
   class Gitpt
-    attr_reader :token, :highline, :initials, :name, :memberships, :applicable_stories, :setting_file
+    attr_reader :token, :highline, :name, :memberships, :applicable_stories, :setting_file
 
     def initialize
       @highline = HighLine.new
@@ -52,7 +52,7 @@ module Limer
     def load_setting
       if File.exists? setting_file
         settings = YAML.load(File.read setting_file)
-        @initials = settings[:initials]
+        @name= settings[:name]
         @token = settings[:token]
       else
       end
@@ -64,10 +64,10 @@ module Limer
         project_ids = File.read(project_id_file).split(/[\s]+/).map(&:to_i)
       end
       unless project_ids and project_ids.size > 0
-        @highline.say "No project config provided. Add project id(s) to .pt_project_id file"
+        @highline.say "Project id олдсонгүй." + bold(".pt_project_id") + " файлд хадгалана уу"
         exit 1
       end
-      loading 'Connecting to Pivotal Tracker: ... ' do
+      loading 'Pivotal Tracker холболт хийгдэж байна: ... ' do
         projects = project_ids.collect do |project_id|
           PivotalTracker::Project.find(project_id)
         end
@@ -89,13 +89,13 @@ module Limer
     end
 
     def request_settings
-      @highline.say highlight('Your settings are missing or invalid.')
-      @highline.say "Please configure your Pivotal Tracker access.\n\n"
-      token = @highline.ask bold("Your API key:") + " "
-      initials = @highline.ask bold("Your PT initials") + " (optional, used for highlighting your stories): "
+      @highline.say missing('Тохиргооны файл байхгүй байна.')
+      @highline.say "Pivotal Tracker холбогдох тохиргоог хийнэ үү.\n\n"
+      @token = @highline.ask bold("API key: ")
+      @name= @highline.ask bold("Pivotal Tracker дээрх нэр: ")
       @highline.say "\n"
 
-      settings = { :token => token, :initials => initials }
+      settings = { :token => @token, :name=> @name}
 
       File.open setting_file, 'w' do |file|
         file.write settings.to_yaml
@@ -108,12 +108,12 @@ module Limer
       selected_story = nil
 
       @highline.choose do |menu|
-        menu.header = "Choose a story"
-        applicable_stories.each do |story|
+        menu.header = HighLine::BLUE + "Story сонгоно уу" + HighLine::RESET
+        @applicable_stories.each do |story|
           owner_name = story.owned_by
           owner = if owner_name
             owners = memberships.select{|member| member.name == owner_name}
-            owners.first ? owners.first.initials : '?'
+            owners.first ? owners.first.name: '?'
           else 
             '?'
           end
@@ -124,24 +124,34 @@ module Limer
           elsif state != 'finished'
             state = HighLine::RED + state + HighLine::RESET
           end
-          state += HighLine::BOLD if owner == initials
+          state += HighLine::BOLD if owner == @name
 
-          label = "(#{owner}, #{state}) #{story.name}"
-          label = bold(label) if owner == initials
+          label = "(" + HighLine::YELLOW + "#{owner}"+ HighLine::RESET + ", #{state}) #{story.name} - " + HighLine::BLUE + story.story_type.capitalize + HighLine::RESET
+          label = bold(label) if owner == @name
           menu.choice(label) { selected_story = story }
+        end
+        menu.choice 'Гарах' do |chosen|
+          exit 1
         end
         menu.hidden ''
       end
 
       if selected_story
-        message = @highline.ask("\nAdd an optional message")
-        @highline.say message
-
-        commit_message = "[##{selected_story.id}] #{selected_story.name}"
-        if message.strip != ''
-          commit_message << ' - '<< message.strip
+        message = nil
+        @highline.choose do |menu|
+          menu.header = "Төрлөө сонгоно уу"
+          menu.choices "fixed","delivers","Гарах" do |chosen|
+            if chosen == "Гарах"
+              exit 1
+            end
+            message = chosen
+          end
+          menu.hidden ''
         end
 
+
+        commit_message = "[#{message} ##{selected_story.id}] #{selected_story.name}"
+        # puts commit_message
         exec('git', 'commit', '-m', commit_message)
       end
     end
